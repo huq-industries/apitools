@@ -67,8 +67,7 @@ def YieldFromList(
         method='List', field='items', predicate=None,
         current_token_attribute='pageToken',
         next_token_attribute='nextPageToken',
-        batch_size_attribute='maxResults',
-        get_field_func=_GetattrNested):
+        batch_size_attribute='maxResults'):
     """Make a series of List requests, keeping track of page tokens.
 
     Args:
@@ -95,8 +94,6 @@ def YieldFromList(
           response message holding the maximum number of results to be
           returned. None if caller-specified batch size is unsupported.
           If a tuple, path to the attribute.
-      get_field_func: Function that returns the items to be yielded. Argument
-          is response message, and field.
 
     Yields:
       protorpc.message.Message, The resources listed by the service.
@@ -119,7 +116,7 @@ def YieldFromList(
             _SetattrNested(request, batch_size_attribute, request_batch_size)
         response = getattr(service, method)(request,
                                             global_params=global_params)
-        items = get_field_func(response, field)
+        items = _GetattrNested(response, field)
         if predicate:
             items = list(filter(predicate, items))
         for item in items:
